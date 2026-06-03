@@ -1,0 +1,19 @@
+[package]
+name = "yummers"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+tokio = { version = "1.21.2", features = ["macros", "rt-multi-thread"] }
+
+[dependencies.serenity]
+version = "0.12"
+features = ["cache", "voice", "gateway", "client", "standard_framework"]
+
+[dependencies.songbird]
+version = "0.6"
+features = ["serenity", "driver", "builtin-queue"]
+
+[dependencies.symphonia]
+version = "0.5"
+features = ["aac", "mp3", "isomp4", "alac"]
