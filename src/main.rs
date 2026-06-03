@@ -4,13 +4,15 @@ use serenity::async_trait;
 use serenity::model::channel::Message;
 use serenity::prelude::*;
 use serenity::builder::CreateAttachment;
+use shuttle_runtime::SecretStore;
 use songbird::input::File;
 use songbird::SerenityInit;
+use anyhow::Context as _;
 
-struct Handler;
+struct Bot;
 
 #[async_trait]
-impl EventHandler for Handler {
+impl EventHandler for Bot {
     async fn message(&self, ctx: Context, msg: Message) {
         if msg.author.bot {
             return;
@@ -62,15 +64,17 @@ async fn get_active_voice_channel_id(ctx: &Context, guild_id: GuildId, user_id: 
     ctx.http.get_user_voice_state(guild_id, user_id).await.ok()?.channel_id
 }
 
-#[tokio::main]
-async fn main() {
-    let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
+#[shuttle_runtime::main]
+async fn serenity(
+    #[shuttle_runtime::Secrets] secrets: SecretStore,
+) -> shuttle_serenity::ShuttleSerenity {
+    let token = secrets.get("DISCORD_TOKEN").context("'DISCORD_TOKEN' was not found")?;
     let intents = GatewayIntents::GUILD_MESSAGES
         | GatewayIntents::MESSAGE_CONTENT
         | GatewayIntents::GUILD_VOICE_STATES;
 
     let mut client = Client::builder(&token, intents)
-        .event_handler(Handler)
+        .event_handler(Bot)
         .register_songbird()
         .await
         .expect("Err creating client");
@@ -78,4 +82,6 @@ async fn main() {
     if let Err(why) = client.start().await {
         println!("Client error: {why:?}");
     }
+
+    Ok(client.into())
 }

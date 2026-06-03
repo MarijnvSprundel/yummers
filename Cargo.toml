@@ -5,6 +5,9 @@ edition = "2024"
 
 [dependencies]
 tokio = { version = "1.21.2", features = ["macros", "rt-multi-thread"] }
+shuttle-runtime = "0.57.0"
+shuttle-serenity = "0.57.0"
+anyhow = "1.0.102"
 
 [dependencies.serenity]
 version = "0.12"
